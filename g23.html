@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc nghiệm G23 - Đạo hàm hàm ẩn & hàm hợp</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            padding: 30px;
+        }
+        h1 {
+            color: #2d3748;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #718096;
+            margin-bottom: 25px;
+            font-style: italic;
+        }
+        .stats-bar {
+            background: #f7fafc;
+            padding: 15px 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .stat-item {
+            background: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-weight: bold;
+        }
+        .stat-item span:first-child {
+            color: #4a5568;
+        }
+        .stat-item span:last-child {
+            color: #667eea;
+            font-size: 1.3rem;
+            margin-left: 8px;
+        }
+        .score-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 25px;
+            border-radius: 25px;
+        }
+        .reset-btn {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 8px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .reset-btn:hover {
+            transform: scale(1.05);
+            background: #c53030;
+        }
+        .question-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            transition: box-shadow 0.3s;
+        }
+        .question-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .question-number {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .level-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .level-easy { background: #c6f6d5; color: #22543d; }
+        .level-medium { background: #feebc8; color: #7b341e; }
+        .level-hard { background: #fed7d7; color: #742a2a; }
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #2d3748;
+            margin: 15px 0;
+            line-height: 1.4;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 15px 0;
+        }
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 12px 18px;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option:hover {
+            background: #edf2f7;
+            border-color: #667eea;
+        }
+        .option-letter {
+            font-weight: bold;
+            width: 35px;
+            height: 35px;
+            background: #cbd5e0;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: #2d3748;
+        }
+        .option-text {
+            flex: 1;
+        }
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            display: none;
+            font-size: 0.9rem;
+        }
+        .feedback.correct {
+            display: block;
+            background: #c6f6d5;
+            border-left: 4px solid #38a169;
+            color: #22543d;
+        }
+        .feedback.wrong {
+            display: block;
+            background: #fed7d7;
+            border-left: 4px solid #e53e3e;
+            color: #742a2a;
+        }
+        .explanation {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+            font-size: 0.85rem;
+        }
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .question-text { font-size: 1rem; }
+            .option { padding: 8px 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📐 Trắc nghiệm G23</h1>
+    <div class="subtitle">Đạo hàm hàm ẩn (implicit differentiation) & Quy tắc chuỗi (chain rule)</div>
+    
+    <div class="stats-bar">
+        <div class="stat-item"><span>📋 Tổng số câu:</span><span id="totalCount">15</span></div>
+        <div class="stat-item"><span>✅ Đã trả lời:</span><span id="answeredCount">0</span></div>
+        <div class="score-box"><span>🎯 Điểm số:</span><span id="scoreDisplay">0</span></div>
+        <button class="reset-btn" id="resetBtn">⟳ Làm lại</button>
+    </div>
+    
+    <div id="questionsContainer"></div>
+    
+    <div class="footer">
+        <p>📐 MathJax hiển thị công thức toán học | 🟢 Xanh = đúng | 🔴 Đỏ = sai | Mỗi câu có giải thích chi tiết</p>
+    </div>
+</div>
+
+<script>
+    // ======================= 15 CÂU HỎI G23 =======================
+    const questions = [
+        // 5 câu DỄ (easy)
+        {
+            text: "Cho hàm ẩn \\(x^2 + y^2 = 25\\). Tìm \\(\\frac{dy}{dx}\\) theo \\(x, y\\).",
+            options: ["\\(-\\frac{x}{y}\\)", "\\(\\frac{x}{y}\\)", "\\(-\\frac{y}{x}\\)", "\\(\\frac{y}{x}\\)"],
+            correct: 0,
+            explanation: "Đạo hàm hai vế: \\(2x + 2y \\cdot y' = 0 \\Rightarrow y' = -\\frac{x}{y}\\).",
+            level: "easy"
+        },
+        {
+            text: "Cho \\(f(x) = (2x+1)^5\\). Tính \\(f'(x)\\).",
+            options: ["\\(5(2x+1)^4\\)", "\\(10(2x+1)^4\\)", "\\(2(2x+1)^4\\)", "\\(10(2x+1)^5\\)"],
+            correct: 1,
+            explanation: "Quy tắc chuỗi: \\(f'(x)=5(2x+1)^4 \\cdot 2 = 10(2x+1)^4\\).",
+            level: "easy"
+        },
+        {
+            text: "Cho \\(y = \\sin(3x^2)\\). Tìm \\(\\frac{dy}{dx}\\).",
+            options: ["\\(6x \\cos(3x^2)\\)", "\\(\\cos(3x^2)\\)", "\\(-6x \\cos(3x^2)\\)", "\\(3x^2 \\cos(3x^2)\\)"],
+            correct: 0,
+            explanation: "Đạo hàm ngoài là \\(\\cos\\), nhân đạo hàm trong: \\(y' = \\cos(3x^2) \\cdot 6x = 6x \\cos(3x^2)\\).",
+            level: "easy"
+        },
+        {
+            text: "Cho phương trình ẩn: \\(xy = 1\\). Tìm \\(\\frac{dy}{dx}\\).",
+            options: ["\\(-\\frac{y}{x}\\)", "\\(\\frac{y}{x}\\)", "\\(-\\frac{x}{y}\\)", "\\(\\frac{x}{y}\\)"],
+            correct: 0,
+            explanation: "Đạo hàm: \\(y + x y' = 0 \\Rightarrow y' = -\\frac{y}{x}\\).",
+            level: "easy"
+        },
+        {
+            text: "Nếu \\(f(x) = e^{\\sqrt{x}}\\), thì \\(f'(x)\\) bằng:",
+            options: ["\\(\\frac{e^{\\sqrt{x}}}{2\\sqrt{x}}\\)", "\\(e^{\\sqrt{x}} \\cdot \\sqrt{x}\\)", "\\(\\frac{e^{\\sqrt{x}}}{\\sqrt{x}}\\)", "\\(2\\sqrt{x} e^{\\sqrt{x}}\\)"],
+            correct: 0,
+            explanation: "Đạo hàm: \\(f'(x)=e^{\\sqrt{x}} \\cdot \\frac{1}{2\\sqrt{x}} = \\frac{e^{\\sqrt{x}}}{2\\sqrt{x}}\\).",
+            level: "easy"
+        },
+        // 5 câu TRUNG BÌNH (medium)
+        {
+            text: "Cho \\(x^3 + y^3 = 6xy\\). Tìm \\(\\frac{dy}{dx}\\) tại điểm \\((3,3)\\).",
+            options: ["\\(-1\\)", "\\(1\\)", "\\(0\\)", "\\(2\\)"],
+            correct: 0,
+            explanation: "Đạo hàm ẩn: \\(3x^2+3y^2 y' = 6y+6xy'\\). Thay (3,3): \\(27+27y'=18+18y' \\Rightarrow 9y'=-9 \\Rightarrow y'=-1\\).",
+            level: "medium"
+        },
+        {
+            text: "Cho \\(y = \\ln(\\cos(2x))\\). Tính \\(\\frac{dy}{dx}\\).",
+            options: ["\\(-2\\tan(2x)\\)", "\\(2\\tan(2x)\\)", "\\(-\\tan(2x)\\)", "\\(-2\\cot(2x)\\)"],
+            correct: 0,
+            explanation: "\\(y' = \\frac{1}{\\cos(2x)} \\cdot (-\\sin(2x)\\cdot 2) = -2\\tan(2x)\\).",
+            level: "medium"
+        },
+        {
+            text: "Cho \\(h(x) = f(g(x))\\) với \\(g(1)=2, g'(1)=4, f'(2)=3\\). Tìm \\(h'(1)\\).",
+            options: ["\\(12\\)", "\\(7\\)", "\\(3\\)", "\\(8\\)"],
+            correct: 0,
+            explanation: "Quy tắc chuỗi: \\(h'(1)=f'(g(1))\\cdot g'(1)=f'(2)\\cdot4=3\\cdot4=12\\).",
+            level: "medium"
+        },
+        {
+            text: "Cho \\(\\sin(xy) = x\\). Tìm \\(\\frac{dy}{dx}\\).",
+            options: ["\\(\\frac{1 - y\\cos(xy)}{x\\cos(xy)}\\)", "\\(\\frac{1}{\\cos(xy)} - y\\)", "\\(\\frac{1-\\cos(xy)}{x\\cos(xy)}\\)", "\\(\\frac{1}{x\\cos(xy)}-y\\)"],
+            correct: 0,
+            explanation: "Đạo hàm: \\(\\cos(xy)(y + xy') = 1 \\Rightarrow y' = \\frac{1- y\\cos(xy)}{x\\cos(xy)}\\).",
+            level: "medium"
+        },
+        {
+            text: "Tìm \\(\\frac{dy}{dx}\\) nếu \\(y = \\sqrt[3]{x^2 + \\tan x}\\).",
+            options: ["\\(\\frac{2x + \\sec^2 x}{3(x^2+\\tan x)^{2/3}}\\)", "\\(\\frac{2x+\\sec^2 x}{3\\sqrt[3]{(x^2+\\tan x)^2}}\\)", "Cả A và B đều đúng", "\\(\\frac{2x+\\sec^2 x}{\\sqrt[3]{x^2+\\tan x}}\\)"],
+            correct: 0,
+            explanation: "Viết \\(y=(x^2+\\tan x)^{1/3}\\), \\(y' = \\frac{1}{3}(x^2+\\tan x)^{-2/3}(2x+\\sec^2 x)\\). Đáp án A đúng.",
+            level: "medium"
+        },
+        // 5 câu KHÓ (hard)
+        {
+            text: "Cho phương trình ẩn: \\(e^{xy} + \\ln(y) = x^2\\). Tìm \\(y'\\) tại điểm \\((0,1)\\).",
+            options: ["\\(-1\\)", "\\(0\\)", "\\(1\\)", "\\(2\\)"],
+            correct: 0,
+            explanation: "Đạo hàm: \\(e^{xy}(y+xy') + \\frac{y'}{y}=2x\\). Tại (0,1): \\(1(1+0)+y' =0 \\Rightarrow 1 + y' =0 \\Rightarrow y'=-1\\).",
+            level: "hard"
+        },
+        {
+            text: "Cho \\(f(x) = g(\\sin(2x))\\) với \\(g\\) khả vi. Biết \\(g'(\\frac{\\sqrt{3}}{2}) = 4\\). Tính \\(f'(\\frac{\\pi}{6})\\).",
+            options: ["\\(4\\)", "\\(8\\)", "\\(-4\\)", "\\(2\\)"],
+            correct: 0,
+            explanation: "\\(f'(x)=g'(\\sin 2x)\\cdot \\cos(2x)\\cdot 2\\). Tại \\(x=\\pi/6\\), \\(\\sin(\\pi/3)=\\sqrt{3}/2\\), \\(\\cos(\\pi/3)=1/2\\). Vậy \\(f'=4 \\cdot \\frac{1}{2} \\cdot 2 = 4\\).",
+            level: "hard"
+        },
+        {
+            text: "Tìm đạo hàm cấp 1 của hàm ẩn \\(x^2y^3 + \\cos(x+y) = 0\\) tại \\((\\pi, \\pi)\\).",
+            options: ["\\(-\\frac{2}{3}\\)", "\\(\\frac{2}{3}\\)", "\\(-\\frac{\\pi}{3}\\)", "\\(\\frac{\\pi}{3}\\)"],
+            correct: 0,
+            explanation: "Đạo hàm: \\(2xy^3+3x^2y^2 y' - \\sin(x+y)(1+y')=0\\). Tại \\((\\pi,\\pi)\\): \\(\\sin(2\\pi)=0\\). Có \\(2\\pi^4 + 3\\pi^4 y' =0 \\Rightarrow y' = -\\frac{2}{3}\\).",
+            level: "hard"
+        },
+        {
+            text: "Cho \\(f(x) = \\sqrt{x^2 + \\sqrt{x^2 + \\sqrt{x^2+1}}}\\). Tính \\(f'(0)\\).",
+            options: ["\\(0\\)", "\\(1\\)", "Không tồn tại", "\\(\\frac{1}{2}\\)"],
+            correct: 0,
+            explanation: "Hàm chẵn, đạo hàm tại 0 bằng 0 (do toàn bộ bậc chẵn và khả vi). Chi tiết: \\(f(x) = \\sqrt{x^2+u(x)}\\) với \\(u(0)=1\\), đạo hàm tại 0 triệt tiêu vì có hệ số x.",
+            level: "hard"
+        },
+        {
+            text: "Tìm \\(y'\\) nếu \\(\\arctan(xy) = \\ln(x+y)\\) tại điểm thỏa mãn \\(x=0, y=1\\).",
+            options: ["\\(-1\\)", "\\(1\\)", "\\(0\\)", "\\(2\\)"],
+            correct: 2,
+            explanation: "Đạo hàm ẩn: \\(\\frac{y+xy'}{1+(xy)^2} = \\frac{1+y'}{x+y}\\). Thay x=0,y=1: VT = 1, VP=1+y' \\Rightarrow y'=0\\).",
+            level: "hard"
+        }
+    ];
+    
+    // State quản lý
+    let userAnswers = new Array(15).fill(null);  // lưu chỉ số đáp án đã chọn (0-3)
+    let answeredCount = 0;
+    let score = 0;
+    
+    // DOM elements
+    const container = document.getElementById("questionsContainer");
+    const answeredSpan = document.getElementById("answeredCount");
+    const scoreSpan = document.getElementById("scoreDisplay");
+    const resetBtn = document.getElementById("resetBtn");
+    
+    // Cập nhật điểm và thống kê
+    function updateStats() {
+        answeredSpan.textContent = answeredCount;
+        scoreSpan.textContent = score;
+    }
+    
+    // Tính lại điểm từ đầu
+    function recalculateScore() {
+        let newScore = 0;
+        for (let i = 0; i < 15; i++) {
+            if (userAnswers[i] !== null && userAnswers[i] === questions[i].correct) {
+                newScore++;
+            }
+        }
+        score = newScore;
+        scoreSpan.textContent = score;
+    }
+    
+    // Xử lý khi chọn đáp án
+    function selectAnswer(qIndex, optIndex) {
+        const isCorrect = (optIndex === questions[qIndex].correct);
+        const wasAnswered = (userAnswers[qIndex] !== null);
+        
+        // Nếu chưa trả lời câu này
+        if (!wasAnswered) {
+            answeredCount++;
+        }
+        
+        // Lưu đáp án
+        userAnswers[qIndex] = optIndex;
+        
+        // Cập nhật điểm
+        recalculateScore();
+        updateStats();
+        
+        // Cập nhật giao diện cho câu hỏi này
+        updateQuestionUI(qIndex);
+    }
+    
+    // Cập nhật giao diện của một câu hỏi (highlight và feedback)
+    function updateQuestionUI(qIndex) {
+        const card = document.getElementById(`q-${qIndex}`);
+        if (!card) return;
+        
+        const selected = userAnswers[qIndex];
+        const qData = questions[qIndex];
+        const isCorrect = (selected !== null && selected === qData.correct);
+        
+        // Highlight các lựa chọn
+        const options = card.querySelectorAll('.option');
+        options.forEach((opt, idx) => {
+            if (idx === selected) {
+                if (isCorrect) {
+                    opt.style.background = "#c6f6d5";
+                    opt.style.borderColor = "#38a169";
+                } else {
+                    opt.style.background = "#fed7d7";
+                    opt.style.borderColor = "#e53e3e";
+                }
+            } else {
+                opt.style.background = "#f7fafc";
+                opt.style.borderColor = "#e2e8f0";
+            }
+        });
+        
+        // Hiển thị feedback
+        const feedbackDiv = card.querySelector('.feedback');
+        if (selected !== null) {
+            feedbackDiv.className = `feedback ${isCorrect ? 'correct' : 'wrong'}`;
+            feedbackDiv.innerHTML = `
+                <strong>${isCorrect ? '✅ Đúng!' : '❌ Sai!'}</strong>
+                <div class="explanation">📖 ${qData.explanation}</div>
+            `;
+        } else {
+            feedbackDiv.className = 'feedback';
+            feedbackDiv.innerHTML = '';
+        }
+    }
+    
+    // Render toàn bộ câu hỏi
+    function renderQuestions() {
+        container.innerHTML = '';
+        
+        questions.forEach((q, idx) => {
+            const levelClass = q.level === 'easy' ? 'level-easy' : (q.level === 'medium' ? 'level-medium' : 'level-hard');
+            const levelText = q.level === 'easy' ? '🟢 Dễ' : (q.level === 'medium' ? '🟠 Trung bình' : '🔴 Khó');
+            
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.id = `q-${idx}`;
+            
+            card.innerHTML = `
+                <div class="question-header">
+                    <span class="question-number">Câu ${idx + 1}</span>
+                    <span class="level-badge ${levelClass}">${levelText}</span>
+                </div>
+                <div class="question-text">${q.text}</div>
+                <div class="options" id="options-${idx}"></div>
+                <div class="feedback"></div>
+            `;
+            
+            container.appendChild(card);
+            
+            // Thêm các lựa chọn
+            const optionsContainer = card.querySelector(`#options-${idx}`);
+            const letters = ['A', 'B', 'C', 'D'];
+            
+            q.options.forEach((opt, optIdx) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.innerHTML = `
+                    <span class="option-letter">${letters[optIdx]}</span>
+                    <span class="option-text">${opt}</span>
+                `;
+                optionDiv.addEventListener('click', () => selectAnswer(idx, optIdx));
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            // Nếu đã có đáp án thì cập nhật UI
+            if (userAnswers[idx] !== null) {
+                updateQuestionUI(idx);
+            }
+        });
+        
+        // Refresh MathJax để hiển thị công thức
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+    }
+    
+    // Reset toàn bộ
+    function resetQuiz() {
+        userAnswers = new Array(15).fill(null);
+        answeredCount = 0;
+        score = 0;
+        updateStats();
+        renderQuestions();
+    }
+    
+    // Khởi tạo
+    renderQuestions();
+    resetBtn.addEventListener('click', resetQuiz);
+    document.getElementById("totalCount").textContent = "15";
+</script>
+</body>
+</html>
